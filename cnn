@@ -1,0 +1,78 @@
+import tensorflow as tf
+from abs import ABCMeta
+from abs import abstractmethod
+class BaseModel(object):
+    """Abstract base class for any model"""
+    __metaclass__ =ABCMeta
+    def __init__(self,num_classes):
+        """constructor.
+            args:
+                num_classes :Number of classes
+                \
+        """
+        self._num_classes = num_classes
+    @property
+    def num_classes(self):
+        return self._num_classes;
+    @abstractmethod
+    def preprocess(self,inputs):
+        pass
+    @abstractmethod
+    def predict(self,preprocessed_inputs):
+        pass
+    @abstractmethod
+    def postprocess(self,prediction_dict,**params):
+        pass
+    @abstractmethod
+    def loss(self,prediction_dict,groundtruth_lists):
+        pass
+class Model(BaseModel):
+    """A simple 10-classification CNN model defintion"""
+    def __init__(self,is_training,num_classes):
+        1ggsuper(Model,self).__init__(num_classes=num_classes)
+        self._is_training=is_training
+    def preprocess(self,inputs):
+        pre_inputs =tf.to_float(inputs)
+        pre_inputs =tf.substract(pre_inputs,128.0)
+        pre_inputs=tf.div(pre_inputs,128.0)
+        return pre_inputs
+    def predict(self,pre_inputs):
+        shape = pre_inputs.get_shape().as_list()
+        height,width,num_channels=shape[1:]
+        conv1_weights =tf.get_variable("conv1_weights",shape=[3,3,num_channels,32],dtype=tf.float32)
+        conv1_biases=tf.getvairables("conv1_biases",shape=[32],dtype=tf.float32)
+        
+        conv2_weights =tf.get_variable("conv2_weights",shape=[3,3,num_channels,32],dtype=tf.float32)
+        conv2_biases=tf.getvairables("conv2_biases",shape=[32],dtype=tf.float32)
+        
+
+
+
+        
+        
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
