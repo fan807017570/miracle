@@ -1,78 +1,101 @@
 import tensorflow as tf
 from abs import ABCMeta
 from abs import abstractmethod
+
+
 class BaseModel(object):
     """Abstract base class for any model"""
-    __metaclass__ =ABCMeta
-    def __init__(self,num_classes):
+    __metaclass__ = ABCMeta
+
+    def __init__(self, num_classes):
         """constructor.
             args:
                 num_classes :Number of classes
                 \
         """
         self._num_classes = num_classes
+
     @property
     def num_classes(self):
         return self._num_classes;
+
     @abstractmethod
-    def preprocess(self,inputs):
+    def preprocess(self, inputs):
         pass
+
     @abstractmethod
-    def predict(self,preprocessed_inputs):
+    def predict(self, preprocessed_inputs):
         pass
+
     @abstractmethod
-    def postprocess(self,prediction_dict,**params):
+    def postprocess(self, prediction_dict, **params):
         pass
+
     @abstractmethod
-    def loss(self,prediction_dict,groundtruth_lists):
+    def loss(self, prediction_dict, groundtruth_lists):
         pass
+
+
 class Model(BaseModel):
     """A simple 10-classification CNN model defintion"""
-    def __init__(self,is_training,num_classes):
-        1ggsuper(Model,self).__init__(num_classes=num_classes)
-        self._is_training=is_training
-    def preprocess(self,inputs):
-        pre_inputs =tf.to_float(inputs)
-        pre_inputs =tf.substract(pre_inputs,128.0)
-        pre_inputs=tf.div(pre_inputs,128.0)
+
+    def __init__(self, is_training, num_classes):
+        super(Model, self).__init__(num_classes=num_classes)
+        self._is_training = is_training
+
+    def preprocess(self, inputs):
+        pre_inputs = tf.to_float(inputs)
+        pre_inputs = tf.substract(pre_inputs, 128.0)
+        pre_inputs = tf.div(pre_inputs, 128.0)
         return pre_inputs
-    def predict(self,pre_inputs):
+
+    def predict(self, pre_inputs):
         shape = pre_inputs.get_shape().as_list()
-        height,width,num_channels=shape[1:]
-        conv1_weights =tf.get_variable("conv1_weights",shape=[3,3,num_channels,32],dtype=tf.float32)
-        conv1_biases=tf.getvairables("conv1_biases",shape=[32],dtype=tf.float32)
-        
-        conv2_weights =tf.get_variable("conv2_weights",shape=[3,3,num_channels,32],dtype=tf.float32)
-        conv2_biases=tf.getvairables("conv2_biases",shape=[32],dtype=tf.float32)
-        
+        height, width, num_channels = shape[1:]
+        conv1_weights = tf.get_variable("conv1_weights", shape=[3, 3, num_channels, 32], dtype=tf.float32)
+        conv1_biases = tf.get_vairable("conv1_biases", shape=[32], dtype=tf.float32)
 
+        conv2_weights = tf.get_variable("conv2_weights", shape=[3, 3, num_channels, 32], dtype=tf.float32)
+        conv2_biases = tf.get_vairable("conv2_biases", shape=[32], dtype=tf.float32)
+		
 
+		conv3_weights =tf.get_variable("conv3_weights",shape=[3,3,32,64],dtype=tf,float32)
+		conv3_biases=tf.get_variable("con3_biases",shape=[64],dtype=tf.float32)
 
-        
-        
-       
+		conv4_weights=tf.get_variable("conv4_weights",shape=[3,3,64,64],dtype=tf.float32)
+		conv4_biases=tf.get_variable("conv4_biases",shape=[64],dtype=tf.float32)
 
+		conv5_weights=tf.get_variable("conv5_weights",shape=[3,3,64,128],dtype=tf.float32)
+		conv5_biases=tf.get_variable("conv5_biases",shape=[128],dtype=tf.float32)
 
+		conv6_weights=tf.get_variable("con6_weights",shape=[3,3,128,128],dtype=tf.float32)
+		conv6_biases=tf.get_variable("conv6_biases",shape=[128],dtype=tf.float32)
+		
+		flat_height=height//4
+		flat_width=width//4
+		flat_size=flat_height*flat_width*128#因为有两次max_pooling 所以尺寸会缩小四倍，为全联接的参数计算逻辑
+		fc7_weights = tf.get_variable("fc7_weights",shape=[flat_size,512],dtype=tf.float32)
+		fc7_biases =tf.get_variable("fc7_biases",shape=[512],dtype=tf.floag32)
+		
+		fc8_weights = tf.get_variable("fc8_weights",shape=[512,512],dtype=tf.float32)
+		fc8_biases =tf.get_variable("fc8_biases",shape=[512],dtype=tf.floag32)
 
+	
+		fc9_weights = tf.get_variable("fc7_weights",shape=[512,self.num_classes],dtype=tf.float32)
+		fc9_biases =tf.get_variable("fc7_biases",shape=[self.num_classes],dtype=tf.float32)
+		
+		net = pre_inputs;
+		net = tf.nn.conv2d(net,conv1_weights,strides=[1,1,1,1],padding='SAME')
+		net = tf.nn.relu(tf.nn.bias_add(net,conv1_biases))
+		net = tf.nn.conv2d(net,conv2_weights,strides=[1,1,1,1],padding='SAME')
+		net = tf.nn.relu(tf.nn.bias_add(net,conv2_biases))
+		
+		net = tf.max_pool(net,ksize=[1,2,2,1],strides=[1,2,2,1],pading='SAME')
+		
 
+	
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		
 
 
 
