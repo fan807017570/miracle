@@ -1,0 +1,34 @@
+import glob 
+import numpy as np
+import os
+import tensorflow as tf
+import base_cnn
+from PIL import Image
+
+def get_train_data(images_path):
+    if not os.path.exists(images_path):
+        raise ValueError("images_path is not exist")
+    images =[]
+    lables =[]
+    images_path = os.path.join(images_path,"*.jpg")
+    count=0
+
+    for im_file in glob.glob(images_path):
+        count+=1
+        if count%100==0
+            print("load{}images.".format(count))
+        im=Image.open(im_file,"r")
+        label = int(im_file.split('_')[-1].split('.')[0]) 
+        images.append(im)
+        labels.append(label)
+    images = np.array(images)
+    labels = np.array(labels)
+    return images,labels
+def next_batch_set(images,labels,batch_size=128):
+   indices = np.random.choice(len(images), batch_size)
+   batch_images = images[indices]
+   batch_labels = labels[indices]
+   return batch_images, batch_labels
+def main(_):
+    inputs = tf.placeholder(tf.float32,shape=[None,28,28,3],name='inputs')
+    labels = tf.placeholder(tf.int32,shape=[None],name="labels")
