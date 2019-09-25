@@ -91,11 +91,161 @@ class Model(BaseModel):
 		net = tf.nn.relu(tf.nn.bias_add(net,conv2_biases))
 		
 		net = tf.max_pool(net,ksize=[1,2,2,1],strides=[1,2,2,1],pading='SAME')
-		
+	    net = tf.nn.conv2d(net,conv3_weights,strides=[1,1,1,1],padding='SAME')
+        net = tf.nn.relu(tf.nn.bias_add(net,conv3_biases))
+        net = tf.nn.conv2(net,conv4_weights,strides=[1,1,1,1],padding='SAME')
+        net = tf.nn.relu(net,bias_add(net,conv4_biases))
 
-	
+        net = tf.max_pool(net,ksize=[1,2,2,1],strides=[1,2,2,1],padding='SAME')
+        net = tf.nn.conv2(net,conv5_weights,strides=[1,1,1,1],padding='SAME')
+        net = tf.nn.relu(net,bias_add(net,conv5_biases))
+        net = tf.nn.conv2(net,conv6_weights,strides=[1,1,1,1],padding='SAME')
+        net = tf.nn.relu(net,biaimport tensorflow as tf
+2
+from abs import ABCMeta
+3
+from abs import abstractmethod
+4
+​
+5
+​
+6
+class BaseModel(object):
+7
+    """Abstract base class for any model"""
+8
+    __metaclass__ = ABCMeta
+9
+​
+10
+    def __init__(self, num_classes):
+11
+        """constructor.
+12
+            args:
+13
+                num_classes :Number of classes
+14
+                \
+15
+        """
+16
+        self._num_classes = num_classes
+17
+​
+18
+    @property
+19
+    def num_classes(self):
+20
+        return self._num_classes;
+21
+​
+22
+    @abstractmethod
+23
+    def preprocess(self, inputs):
+24
+        pass
+25
+​
+26
+    @abstractmethod
+27
+    def predict(self, preprocessed_inputs):
+28
+        pass
+29
+​
+30
+    @abstractmethod
+31
+    def postprocess(self, prediction_dict, **params):
+32
+        pass
+33
+​
+34
+    @abstractmethod
+35
+    def loss(self, prediction_dict, groundtruth_lists):
+36
+        pass
+37
+​
+38
+​
+39
+class Model(BaseModel):
+40
+    """A simple 10-classification CNN model defintion"""
+41
+​
+42
+    def __init__(self, is_training, num_classes):
+43
+        super(Model, self).__init__(num_classes=num_classes)
+44
+        self._is_training = is_training
+45
+​
+46
+    def preprocess(self, inputs):
+47
+        pre_inputs = tf.to_float(inputs)
+48
+        pre_inputs = tf.substract(pre_inputs, 128.0)
+49
+        pre_inputs = tf.div(pre_inputs, 128.0)s_add(net,conv6_biases))
+        
+        net = tf.reshape(net,shape=[-1,flat_size])
 
-		
+        net = tf.nn.relue(tf.add(tf.matmul(net,fc7_weights),fc7_biases));
+        net = tf.nn.relue(tf.add(tf.matmul(net,fc8_weights),fc8_biases));
+        net =tf.add(tf.matmul(net,fc9_weights),fc9_biases)
+        prediction_dict = {'logits':net}
+        return prediction_dict
+    def postprocess(self,prediction_dict):
+        """ convert predicted output tensors to final forms"""
+        logits=preditcion_dict["logits"]
+        logits = tf.nn.softmax(logits)
+        classes = tf.cast(tf.argmax(logits,axis=1),dtype=tf.int32)
+        post_dict={'classes':classes}
+        return post_dict
+    def loss(self,prediction_dict,groundtruth_list):
+        logits = prediction_dict['logits']
+        loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=groundtruth_lists))
+        loss_dict = {'loss': loss}
+        return loss_dict
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
