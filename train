@@ -32,3 +32,22 @@ def next_batch_set(images,labels,batch_size=128):
 def main(_):
     inputs = tf.placeholder(tf.float32,shape=[None,28,28,3],name='inputs')
     labels = tf.placeholder(tf.int32,shape=[None],name="labels")
+from PIL import Image
+import numpy as np
+from captcha.image import ImageCaptcha
+
+
+def generate_captcha(text="1"):
+    capt = ImageCaptcha(width=48,height=48,font_sizes=[24])
+    image=capt.generate_image(text)
+    image=np.array(image,dtype=np.uint8)
+    return image
+if __name__ == "__main__":
+    output_dir ="./datasets/images/"
+    for i in range(50000):
+        label =np.random.randint(0,10)
+        image=generate_captcha(str(label))
+        image_name ="image{}_{}.jpg".format(i,label)
+        output_path = output_dir+image_name
+        im = Image.fromarray(image.astype("uint8"))
+        im.save(output_path)
