@@ -18,6 +18,31 @@ def get_train_data(images_path):
         if count%100==0
             print("load{}images.".format(count))
         im=Image.open(im_file,"r")
+import glob 
+import numpy as np
+import os
+import tensorflow as tf
+import base_cnn
+from PIL import Image
+
+flags = tf.app.flags
+flags.DEFINE_string('images_path', None, 'Path to training images.')
+flags.DEFINE_string('model_output_path', None, 'Path to model checkpoint.')
+FLAGS = flags.FLAGS
+
+def get_train_data(images_path):
+    if not os.path.exists(images_path):
+        raise ValueError("images_path is not exist")
+    images =[]
+    lables =[]
+    images_path = os.path.join(images_path,"*.jpg")
+    count=0
+
+    for im_file in glob.glob(images_path):
+        count+=1
+        if count%100==0:
+            print("load{}images.".format(count))
+        im=Image.open(im_file,"r")
         label = int(im_file.split('_')[-1].split('.')[0]) 
         images.append(im)
         labels.append(label)
@@ -32,22 +57,47 @@ def next_batch_set(images,labels,batch_size=128):
 def main(_):
     inputs = tf.placeholder(tf.float32,shape=[None,28,28,3],name='inputs')
     labels = tf.placeholder(tf.int32,shape=[None],name="labels")
-from PIL import Image
-import numpy as np
-from captcha.image import ImageCaptcha
+    cls_model = base_cnn.Model(is_training=True,num_classes=10)
+    pre_inputs= cls_model.preprocess(inputs)
+    pre_dict= cls_model.predict(pre_inputs)
+    loss_dict = cls_model.loss(pre_dict,labels)
+    loss=loss_dict["loss"]
+    post_dict = cls_model.postprocess(pre_dict)
+    classes = post_dict["classes"]
+    global_step = tf.Variable(0,trainable=False)
+    learing_rate= tf.train.exponential_decay(0.1,global_step,150,0.9)
+    optimizer = tf.train.MomentumOptimizer(learning_rate,0.9)
+    train_step = optimizer.minimize(loss,global_step)
+    saver = tf.train.Saver()
+    images,targets = get_train_data(FLAGS.images_path)
+    init = tf.global_variables_initializer()
+    with tf.Session() as session:
+        sess.run(init)
+        for i in range(6000):
+            batch_images,batch_labels=next_batch_set(images,targets)
+            train_dict ={inputs:batch_images,labels:batch_labels}
+            sess.run(train_step,feed_dict=train_dict)
+            loss_, acc_ = sess.run([loss, acc], feed_dict=train_dict)
+            train_text = 'step: {}, loss: {}, acc: {}'.format(i+1, loss_, acc_)
+            print(train_text)
+        saver.save(sess,FLAGS.model_output_path)
+    if __name__ =="__main__":
+        tf.app.run()
 
 
-def generate_captcha(text="1"):
-    capt = ImageCaptcha(width=48,height=48,font_sizes=[24])
-    image=capt.generate_image(text)
-    image=np.array(image,dtype=np.uint8)
-    return image
-if __name__ == "__main__":
-    output_dir ="./datasets/images/"
-    for i in range(50000):
-        label =np.random.randint(0,10)
-        image=generate_captcha(str(label))
-        image_name ="image{}_{}.jpg".format(i,label)
-        output_path = output_dir+image_name
-        im = Image.fromarray(image.astype("uint8"))
-        im.save(output_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
